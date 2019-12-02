@@ -5,6 +5,8 @@ function set_nv () {
         codes[1]=$1
         codes[2]=$2
 }
+step_res=0
+run_res=0
 
 function step () {
         if [ ${codes[$1]} -eq 1 ]; then
@@ -12,40 +14,45 @@ function step () {
                 i2=${codes[$1+2]}
                 i3=${codes[$1+3]}
                 codes[$i3]=$((${codes[$i1]} + ${codes[$i2]}))
-                return 0
+                step_res=0
+                return
         elif [ ${codes[$1]} -eq 2 ]; then
                 i1=${codes[$1+1]}
                 i2=${codes[$1+2]}
                 i3=${codes[$1+3]}
                 codes[$i3]=$((${codes[$i1]} * ${codes[$i2]}))
-                return 0
+                step_res=0
+                return
         elif [ ${codes[$1]} -eq 99 ]; then
-                echo "Exited normally"
-                return ${codes[0]}
+                step_res=${codes[0]}
+                return
         else
                 echo "Invalid state"
                 echo ${codes[$1]}
                 exit 1
         fi
 }
-i=0
 function run () {
         codes=("${org[@]}")
         set_nv $1 $2
         run_res=0
-        echo $run_res
+        i=0
         while [ $run_res -eq 0 ]; do
-                run_res=$(step $i)
+                step $i
+                run_res=$step_res
                 i=$(($i + 4))
         done
-        return $run_res
+        return
 }
-for i in {0..100}; do
-        for j in {0..100}; do
-                res=$(run $i $j)
-                if [ $res -eq 19690720 ]; then
-                        echo $i
-                        echo $j
+run 65 56
+echo $run_res
+for noun in {0..100}; do
+        for verb in {0..100}; do
+                run $noun $verb
+                echo $run_res
+                if [ $run_res -eq 19690720 ]; then
+                        echo $((100*$noun + $verb))
+                        exit 0
                 fi
         done
 done
