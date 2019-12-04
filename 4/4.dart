@@ -36,13 +36,13 @@ void main() {
       tot += 1;
     }
   }
-  print('Answer to part 1: ${tot}');
+  print('Answer to part 1: $tot');
   tot = 0;
   for (int i = 307237; i <= 769058; i++) {
     if (check2(i)) {
       tot += 1;
     }
   }
-  print('Answer to part 2: ${tot}');
+  print('Answer to part 2: $tot');
 }
 
