@@ -54,7 +54,7 @@ func mul(index *int, codes []int) []int{
 }
 
 func inp(index *int, codes []int) []int {
-	val := 1
+	val := 5
 	a1 := codes[(*index)+1]
 	codes[a1] = val
 	(*index) += 2
@@ -67,20 +67,42 @@ func out(index *int, codes []int) {
 	(*index) += 2
 }
 
-func jt(index *int, codes []int) []int {
-	return codes
+func jt(index *int, codes []int) {
+	a1, a2, _ := get_args(*index, codes, 2)
+	if a1 != 0 {
+		(*index) = a2
+	} else {
+		(*index) += 3
+	}
 }
 
-func jf(index *int, codes []int) []int {
-	return codes
+func jf(index *int, codes []int) {
+	a1, a2, _ := get_args(*index, codes, 2)
+	if a1 == 0 {
+		(*index) = a2
+	} else {
+		(*index) += 3
+	}
 }
 
-func lt(index *int, codes []int) []int {
-	return codes
+func lt(index *int, codes []int) {
+	a1, a2, a3 := get_args(*index, codes, 3)
+	if a1 < a2 {
+		codes[a3] = 1
+	} else {
+		codes[a3] = 0
+	}
+	(*index) += 4
 }
 
-func eq(index *int, codes []int) []int {
-	return codes
+func eq(index *int, codes []int) {
+	a1, a2, a3 := get_args(*index, codes, 3)
+	if a1 == a2 {
+		codes[a3] = 1
+	} else {
+		codes[a3] = 0
+	}
+	(*index) += 4
 }
 
 func step(index *int, codes []int) {
