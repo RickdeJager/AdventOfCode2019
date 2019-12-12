@@ -4,6 +4,9 @@ package main
 
 import "fmt"
 import "os"
+import "strings"
+import "strconv"
+import "io/ioutil"
 
 
 func get_args(index int, codes []int, num_used int) (int, int, int) {
@@ -53,16 +56,18 @@ func mul(index *int, codes []int) []int{
 	return codes
 }
 
-func inp(index *int, codes []int) []int {
-	val := 5
+func inp(index *int, codes []int ,input_index *int, inputs[]int ) []int {
+	val := inputs[(*input_index)]
 	a1 := codes[(*index)+1]
 	codes[a1] = val
 	(*index) += 2
+	(*input_index) += 1
 	return codes
 }
 
-func out(index *int, codes []int) {
+func out(index *int, codes []int, out_buf *int) {
 	a1, _, _ := get_args(*index, codes, 1)
+	(*out_buf) = a1
 	fmt.Println("[04] PRINT. ", a1)
 	(*index) += 2
 }
@@ -105,25 +110,75 @@ func eq(index *int, codes []int) {
 	(*index) += 4
 }
 
-func step(index *int, codes []int) {
+func step(index *int, codes []int, input_index *int, inputs []int, out_buf *int) int {
 	opcode := codes[*index] % 100
 	switch opcode {
 	case 1: add(index, codes)
 	case 2: mul(index, codes)
-	case 3: inp(index, codes)
-	case 4: out(index, codes)
+	case 3: inp(index, codes, input_index, inputs)
+	case 4: out(index, codes, out_buf)
 	case 5: jt(index, codes)
 	case 6: jf(index, codes)
 	case 7: lt(index, codes)
 	case 8: eq(index, codes)
-	default: os.Exit(0)
+	case 99: return *out_buf
+	default: fmt.Println("invalid opcode: ", opcode)
+		return 0
 	}
+	return -1
+}
+
+func sim(string_codes []string, setting int, input int) int{
+	codes := []int{}
+	for i := range string_codes {
+		int_code, _ := strconv.Atoi(string_codes[i])
+		codes = append(codes, int_code)
+	}
+	index := 0
+	input_index := 0
+	inputs := []int{setting, input} // Setting, input value
+	res := -1
+	out_buf := 0
+	for ;res < 0; {
+		res = step(&index, codes, &input_index, inputs, &out_buf)
+	}
+	return res
 }
 
 func main() {
-codes := []int{3,225,1,225,6,6,1100,1,238,225,104,0,1102,67,92,225,1101,14,84,225,1002,217,69,224,101,-5175,224,224,4,224,102,8,223,223,101,2,224,224,1,224,223,223,1,214,95,224,101,-127,224,224,4,224,102,8,223,223,101,3,224,224,1,223,224,223,1101,8,41,225,2,17,91,224,1001,224,-518,224,4,224,1002,223,8,223,101,2,224,224,1,223,224,223,1101,37,27,225,1101,61,11,225,101,44,66,224,101,-85,224,224,4,224,1002,223,8,223,101,6,224,224,1,224,223,223,1102,7,32,224,101,-224,224,224,4,224,102,8,223,223,1001,224,6,224,1,224,223,223,1001,14,82,224,101,-174,224,224,4,224,102,8,223,223,101,7,224,224,1,223,224,223,102,65,210,224,101,-5525,224,224,4,224,102,8,223,223,101,3,224,224,1,224,223,223,1101,81,9,224,101,-90,224,224,4,224,102,8,223,223,1001,224,3,224,1,224,223,223,1101,71,85,225,1102,61,66,225,1102,75,53,225,4,223,99,0,0,0,677,0,0,0,0,0,0,0,0,0,0,0,1105,0,99999,1105,227,247,1105,1,99999,1005,227,99999,1005,0,256,1105,1,99999,1106,227,99999,1106,0,265,1105,1,99999,1006,0,99999,1006,227,274,1105,1,99999,1105,1,280,1105,1,99999,1,225,225,225,1101,294,0,0,105,1,0,1105,1,99999,1106,0,300,1105,1,99999,1,225,225,225,1101,314,0,0,106,0,0,1105,1,99999,8,226,226,224,102,2,223,223,1005,224,329,1001,223,1,223,1108,677,677,224,1002,223,2,223,1006,224,344,101,1,223,223,1007,226,677,224,102,2,223,223,1005,224,359,101,1,223,223,1007,677,677,224,1002,223,2,223,1006,224,374,101,1,223,223,1108,677,226,224,1002,223,2,223,1005,224,389,1001,223,1,223,108,226,677,224,102,2,223,223,1006,224,404,101,1,223,223,1108,226,677,224,102,2,223,223,1005,224,419,101,1,223,223,1008,677,677,224,102,2,223,223,1005,224,434,101,1,223,223,7,677,226,224,1002,223,2,223,1005,224,449,101,1,223,223,1008,226,226,224,102,2,223,223,1005,224,464,1001,223,1,223,107,226,677,224,1002,223,2,223,1006,224,479,1001,223,1,223,107,677,677,224,102,2,223,223,1005,224,494,1001,223,1,223,1008,226,677,224,102,2,223,223,1006,224,509,1001,223,1,223,1107,677,226,224,102,2,223,223,1005,224,524,101,1,223,223,1007,226,226,224,1002,223,2,223,1006,224,539,1001,223,1,223,107,226,226,224,102,2,223,223,1006,224,554,101,1,223,223,108,677,677,224,1002,223,2,223,1006,224,569,1001,223,1,223,7,226,677,224,102,2,223,223,1006,224,584,1001,223,1,223,8,677,226,224,102,2,223,223,1005,224,599,101,1,223,223,1107,677,677,224,1002,223,2,223,1005,224,614,101,1,223,223,8,226,677,224,102,2,223,223,1005,224,629,1001,223,1,223,7,226,226,224,1002,223,2,223,1006,224,644,1001,223,1,223,108,226,226,224,1002,223,2,223,1006,224,659,101,1,223,223,1107,226,677,224,1002,223,2,223,1006,224,674,101,1,223,223,4,223,99,226}
-	index := 0
-	for ;; {
-		step(&index, codes)
+	file, _ := ioutil.ReadFile("input.txt")
+	contents := string(file)
+	contents = contents[:len(contents)-1]
+	codes := strings.Split(contents, ",")
+	max := 0
+	settings := []int{0, 0, 0, 0, 0}
+//	res_a := 0
+	options := []int{0, 1, 2, 3, 4}
+
+
+	for a:=0; a < 5; a++ {
+		res_a := sim(codes, a, 0)
+		for b:=0; b < 5; b++ {
+			res_b := sim(codes, b, res_a)
+			for c:=0; c < 5; c++ {
+				res_c := sim(codes, c, res_b)
+				for d:=0; d < 5; d++ {
+					res_d := sim(codes, d, res_c)
+					for e:=0; e < 5; e++ {
+						res_e := sim(codes, e, res_d)
+						if res_e > max {
+							max = res_e
+							settings[0] = a
+							settings[1] = b
+							settings[2] = c
+							settings[3] = d
+							settings[4] = e
+						}
+					}
+				}
+			}
+		}
 	}
+	fmt.Println("Max", max, settings)
+//	fmt.Println(sim(codes, 5, 0))
 }
